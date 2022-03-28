@@ -10,6 +10,8 @@ class UltimateTicTacToe:
         self.board = board
         self.select = select
         self.wins = wins
+        if player not in (-1, 1):
+            raise ValueError(f"Player must be 1 (X) or -1 (O), player was {player}")
         self.player = player #x starts
         self.turn = turn
     
@@ -31,7 +33,7 @@ class UltimateTicTacToe:
                 or min(action) < 0
                 or (not self.select[outer_select]) # Outer selection (2 first axes) is permitted by previous move
                 or self.board[action] ): # square is not taken
-            raise Exception("Illegal move : move attempted outside legal selection")
+            raise ValueError("Illegal move : move attempted outside legal selection")
         
         # Set square to be taken by the current player ( -1 or 1, corresponding to either X or O)
         self.board[action] = self.player
