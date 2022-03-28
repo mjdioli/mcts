@@ -26,8 +26,12 @@ class UltimateTicTacToe:
         action = tuple(action)
         outer_select, inner_select = action[:2], action[2:]
         
-        if (not self.select[outer_select]) or self.board[action]:
-            raise Exception()
+        # Do not mutate when move is illegal. User of method must verify this beforehand.
+        if ( max(action) > 2 # Move is within the board
+                or min(action) < 0
+                or (not self.select[outer_select]) # Outer selection (2 first axes) is permitted by previous move
+                or self.board[action] ): # square is not taken
+            raise Exception("Illegal move : move attempted outside legal selection")
         
         # Set square to be taken by the current player ( -1 or 1, corresponding to either X or O)
         self.board[action] = self.player
