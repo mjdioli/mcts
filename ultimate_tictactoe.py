@@ -87,3 +87,13 @@ class UltimateTicTacToe:
         # The legal moves are all the empty squares in the inner boards permitted by the previous move
         moves[outer_indices] = self.board[outer_indices] == 0
         return moves
+    
+    
+    def __str__(self):
+        result = ""
+        for idc, n in zip(itertools.product(*[range(3)]*4), range(81)):
+            if n > 0:
+                result += "\n\n" if (n % 27 == 0)  else "\n" if (n % 9 == 0) else "  " if (n % 3 == 0) else " "
+            idc = tuple(np.array(idc)[[0,2,1,3]])
+            result += ["_", "X", "O"][int(self.board[idc])]
+        return result
