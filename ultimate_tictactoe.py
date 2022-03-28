@@ -7,15 +7,15 @@ class UltimateTicTacToe:
     
     
     def __init__(self, board=np.zeros(UTTT_SHAPE), select=np.ones(TTT_SHAPE), wins=np.zeros(TTT_SHAPE), player=1, turn=0):
-        self.board = np.copy(board)
-        self.select = np.copy(select)
-        self.wins = np.copy(wins)
+        self.board = board
+        self.select = select
+        self.wins = wins
         self.player = player #x starts
         self.turn = turn
     
     
     def immutable_transition_function(self, action : tuple):
-        game_copy = UltimateTicTacToe(self.board, self.select, self.wins, self.player, self.turn)
+        game_copy = UltimateTicTacToe(np.copy(self.board), np.copy(self.select), np.copy(self.wins), self.player, self.turn)
         winner = game_copy.mutable_transition_function(action)
         return game_copy, winner
     
