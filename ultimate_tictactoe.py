@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 UTTT_SHAPE = (3,3,3,3)
 TTT_SHAPE = (3,3)
@@ -38,30 +39,35 @@ class UltimateTicTacToe:
         # Set square to be taken by the current player ( -1 or 1, corresponding to either X or O)
         self.board[action] = self.player
         
-        # Mark the inner board as won if won
-        if UltimateTicTacToe.winner(self.board[outer_select]):
-            self.wins[outer_select] = self.player
-            # If the updated win table results in an overall win, return which player won.
+        # Mark the inner board as won if won, or draw if draw
+        if ( player := UltimateTicTacToe.winner( self.board[outer_select] ) ):
+            self.wins[outer_select] = player
+            # If the updated win table results in an overall win (or draw), return which player won (or 2 if draw).
             if (winner := UltimateTicTacToe.winner(self.wins)):
                 return winner
         
         # If the next inner board to play as defined by the two last axes of the move,
-        # is already won, the next player can choose which inner board they want to play.
-        if UltimateTicTacToe.winner(self.board[inner_select]):
-            # A free selection of inner boards is all the boards which aren't already won.
-            self.select = np.ones(TTT_SHAPE) - np.abs(self.wins)
+        # is already won or drawn, the next player can choose which inner board they want to play.
+        if self.wins[inner_select]:
+            # A free selection of inner boards is all the boards which aren't already won or drawn.
+            self.select = np.ones(TTT_SHAPE) - (self.wins != 0)
         else:
             # Otherwise, the next board to play is defined by the two last axes of the move
             self.select = np.zeros(TTT_SHAPE)
             self.select[inner_select] = 1
-        
+        if not self.select.any():
+            return 2
         self.player *= -1
         self.turn += 1
         return 0 #No winner
-        
-        
+    
+    
+    def play(self, move):
+        return self.mutable_transition_function(move)
+    
+    
     def winner(board):
-        return 1 if UltimateTicTacToe.is_win(board==1) else -1 if UltimateTicTacToe.is_win(board==-1) else 0
+        return 1 if UltimateTicTacToe.is_win(board==1) else -1 if UltimateTicTacToe.is_win(board==-1) else 2 if UltimateTicTacToe._is_draw(board) else 0
     
     
     def is_win(board):
@@ -70,6 +76,10 @@ class UltimateTicTacToe:
             or np.all(board.diagonal()) # 3 in a row on the diagonal
             or np.all(np.flipud(board).diagonal()))
     
+    
+    def _is_draw(board):
+        # Assuming not win
+        return (board != 0).all()
     
     def legal_moves(self):
         moves = np.zeros(UTTT_SHAPE)
