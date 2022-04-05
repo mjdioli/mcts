@@ -30,10 +30,7 @@ class UltimateTicTacToe:
         outer_select, inner_select = action[:2], action[2:]
         
         # Do not mutate when move is illegal. User of method must verify this beforehand.
-        if ( max(action) > 2 # Move is within the board
-                or min(action) < 0
-                or (not self.select[outer_select]) # Outer selection (2 first axes) is permitted by previous move
-                or self.board[action] ): # square is not taken
+        if not self.is_legal(action):
             raise ValueError("Illegal move : move attempted outside legal selection")
         
         # Set square to be taken by the current player ( -1 or 1, corresponding to either X or O)
@@ -87,6 +84,12 @@ class UltimateTicTacToe:
         # The legal moves are all the empty squares in the inner boards permitted by the previous move
         moves[outer_indices] = self.board[outer_indices] == 0
         return moves
+    def is_legal(self, action):
+        outer_select, inner_select = action[:2], action[2:]
+        return ( max(action) <= 2 # Move is within the board
+                and min(action) >= 0
+                and self.select[outer_select] # Outer selection (2 first axes) is permitted by previous move
+                and not self.board[action] )
     
     
     def __str__(self):
