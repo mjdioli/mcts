@@ -7,7 +7,7 @@ TTT_SHAPE = (3,3)
 class UltimateTicTacToe:
     
     
-    def __init__(self, board=np.zeros(UTTT_SHAPE), select=np.ones(TTT_SHAPE), wins=np.zeros(TTT_SHAPE), player=1, turn=0):
+    def __init__(self, board=np.zeros(UTTT_SHAPE), select=np.ones(TTT_SHAPE), wins=np.zeros(TTT_SHAPE), player=1, turn=0, previous_move=None):
         self.board = np.copy(board)
         self.select = np.copy(select)
         self.wins = np.copy(wins)
@@ -15,6 +15,7 @@ class UltimateTicTacToe:
             raise ValueError(f"Player must be 1 (X) or -1 (O), player was {player}")
         self.player = player #x starts
         self.turn = turn
+        self.previous_move = previous_move
     
     
     def immutable_transition_function(self, action : tuple):
@@ -32,6 +33,7 @@ class UltimateTicTacToe:
         # Do not mutate when move is illegal. User of method must verify this beforehand.
         if not self.is_legal(action):
             raise ValueError("Illegal move : move attempted outside legal selection")
+        self.previous_move = action
         
         # Set square to be taken by the current player ( -1 or 1, corresponding to either X or O)
         self.board[action] = self.player
