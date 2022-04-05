@@ -18,8 +18,12 @@ class UltimateTicTacToe:
         self.previous_move = previous_move
     
     
+    def copy(self):
+        return UltimateTicTacToe(self.board, self.select, self.wins, self.player, self.turn)
+    
+    
     def immutable_transition_function(self, action : tuple):
-        game_copy = UltimateTicTacToe(self.board, self.select, self.wins, self.player, self.turn)
+        game_copy = self.copy()
         winner = game_copy.mutable_transition_function(action)
         return game_copy, winner
     
