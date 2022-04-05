@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import itertools
 
 UTTT_SHAPE = (3,3,3,3)
@@ -110,3 +111,15 @@ class UltimateTicTacToe:
             idc = tuple(np.array(idc)[[0,2,1,3]])
             result += ["_", "X", "O"][int(self.board[idc])]
         return result
+
+
+def simulate(board):
+    board = board.copy()
+    won = 0
+    while not won:
+        legal_moves = board.legal_moves()
+        move = random.choice(legal_moves)
+        won = board.play(move)
+    if won == 2:
+        won = 0
+    return won, board
