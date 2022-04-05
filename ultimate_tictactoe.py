@@ -91,7 +91,9 @@ class UltimateTicTacToe:
         outer_indices = self.select.nonzero()
         # The legal moves are all the empty squares in the inner boards permitted by the previous move
         moves[outer_indices] = self.board[outer_indices] == 0
-        return moves
+        return list(zip(*moves.nonzero()))
+    
+    
     def is_legal(self, action):
         outer_select, inner_select = action[:2], action[2:]
         return ( max(action) <= 2 # Move is within the board
