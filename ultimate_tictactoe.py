@@ -8,7 +8,7 @@ TTT_SHAPE = (3,3)
 class UltimateTicTacToe:
     
     
-    def __init__(self, board=np.zeros(UTTT_SHAPE), select=np.ones(TTT_SHAPE), wins=np.zeros(TTT_SHAPE), player=1, turn=0, previous_move=None):
+    def __init__(self, board=np.zeros(UTTT_SHAPE), select=np.ones(TTT_SHAPE), wins=np.zeros(TTT_SHAPE), player=1, turn=0, previous_move=None, winner = 0):
         self.board = np.copy(board)
         self.select = np.copy(select)
         self.wins = np.copy(wins)
@@ -17,10 +17,11 @@ class UltimateTicTacToe:
         self.player = player #x starts
         self.turn = turn
         self.previous_move = previous_move
+        self.winner = winner
     
     
     def copy(self):
-        return UltimateTicTacToe(self.board, self.select, self.wins, self.player, self.turn)
+        return UltimateTicTacToe(self.board, self.select, self.wins, self.player, self.turn, self.previous_move, self.winner)
     
     
     def immutable_transition_function(self, action : tuple):
@@ -49,6 +50,7 @@ class UltimateTicTacToe:
             self.wins[outer_select] = player
             # If the updated win table results in an overall win (or draw), return which player won (or 2 if draw).
             if (winner := UltimateTicTacToe.winner(self.wins)):
+                self.winner = winner
                 return winner
         
         # If the next inner board to play as defined by the two last axes of the move,
@@ -61,9 +63,11 @@ class UltimateTicTacToe:
             self.select = np.zeros(TTT_SHAPE)
             self.select[inner_select] = 1
         if not self.select.any():
+            self.winner = 2
             return 2
         self.player *= -1
         self.turn += 1
+        self.winner = 0
         return 0 #No winner
     
     
@@ -109,13 +113,16 @@ class UltimateTicTacToe:
             if n > 0:
                 result += "\n\n" if (n % 27 == 0)  else "\n" if (n % 9 == 0) else "  " if (n % 3 == 0) else " "
             idc = tuple(np.array(idc)[[0,2,1,3]])
-            result += ["_", "X", "O"][int(self.board[idc])]
+            marks = ["_", "x", "o"]
+            if idc == self.previous_move:
+                marks = ["_","X","O"]
+            result += marks[int(self.board[idc])]
         return result
 
 
 def simulate(board):
     board = board.copy()
-    won = 0
+    won = board.winner
     while not won:
         legal_moves = board.legal_moves()
         move = random.choice(legal_moves)
