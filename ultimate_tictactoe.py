@@ -74,10 +74,12 @@ class UltimateTicTacToe:
     
     
     def is_win(board):
-        return (np.all(board,axis=0).any() # 3 in a row horizontally/vertically
-            or np.all(board,axis=1).any()
-            or np.all(board.diagonal()) # 3 in a row on the diagonal
-            or np.all(np.flipud(board).diagonal()))
+        ones = np.abs(board) == 1
+        _board = board * ones
+        return (np.all(_board,axis=0).any() # 3 in a row horizontally/vertically
+            or np.all(_board,axis=1).any()
+            or np.all(_board.diagonal()) # 3 in a row on the diagonal
+            or np.all(np.flipud(_board).diagonal()))
     
     
     def _is_draw(board):
