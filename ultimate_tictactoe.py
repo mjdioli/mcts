@@ -33,6 +33,7 @@ class UltimateTicTacToe:
         # Insist that the action must be of type tuple, as lists and tuples
         # behave differently when used as indices
         action = tuple(action)
+        
         outer_select, inner_select = action[:2], action[2:]
         
         # Do not mutate when move is illegal. User of method must verify this beforehand.
@@ -86,6 +87,7 @@ class UltimateTicTacToe:
     def _is_draw(board):
         # Assuming not win
         return (board != 0).all()
+    
     
     def legal_moves(self):
         moves = np.zeros(UTTT_SHAPE)
