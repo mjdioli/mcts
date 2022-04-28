@@ -40,14 +40,18 @@ class MCTS:
         return max(self.children[node], key=score)
 
     def do_rollout(self, node):
-        "Make the tree one layer better. (Train for one iteration.)"
+        "Make the tree n layer(s) better. (Train for n iteration(s).)"
         counter = 0
         while counter <= self.budget:
             path = self._select(node)
             leaf = path[-1]
             self._expand(leaf)
+            #print("Passed expand")
             reward = self._simulate(leaf)
+            #print("Passed simulate")
             self._backpropagate(path, reward)
+            #print("Passed backprop")
+            counter +=1
 
     def _select(self, node):
         "Find an unexplored descendent of `node`"
@@ -72,13 +76,16 @@ class MCTS:
 
     def _simulate(self, node):
         "Returns the reward for a random simulation (to completion) of `node`"
-        invert_reward = True
+        #counter = 0
         while True:
             if node.is_terminal():
+                #print("inside_simulate")
                 reward = node.reward()
-                return 1 - reward if invert_reward else reward
+                return reward if self.player == 1 else reward*(-1)
             node = node.find_random_child()
-            invert_reward = not invert_reward
+            """            counter += 1
+            if counter >50:
+                print(node.is_terminal())"""
 
     def _backpropagate(self, path, reward):
         "Send the reward back up to the ancestors of the leaf"

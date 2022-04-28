@@ -2,6 +2,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from collections import defaultdict
 import math
+import copy
 
 BOARD_SIZE = 9 # Must be a square of a natural number
 WIN_X = np.array([1,1,1])
@@ -40,10 +41,7 @@ class UTTNode:
 
         self.current_player *= -1
         
-        if self.is_terminal():
-            return self.reward()    
-        else:
-            return None
+        return self.copy()
 
     def legal_moves(self):
         """
@@ -64,8 +62,8 @@ class UTTNode:
     
     def copy(self):
         new_node = UTTNode(previous_move=self.prev_move, current_player = self.current_player)
-        new_node.top_board = self.top_board.copy()
-        new_node.bot_boards = self.bot_boards.copy()
+        new_node.top_board = copy.deepcopy(self.top_board)
+        new_node.bot_boards = copy.deepcopy(self.bot_boards)
         return new_node
 
     def is_legal(self, action):
@@ -99,17 +97,23 @@ class UTTNode:
         else:
             return 999
 
-
     def find_children(self):
         "All possible successors of this board state"
         if self.is_terminal():
             return set()
         else:
-            return set(self.copy().play(move) for move in self.legal_moves())
+            return set([self.copy().play(move) for move in self.legal_moves()])
 
     def find_random_child(self):
         "Random successor of this board state (for more efficient simulation)"
-        return tuple(np.random.default_rng().choice(self.legal_moves, 1, replace=False, axis = 0)[0])
+        children = list(self.find_children())
+        #print("Children: ", children)
+        if len(children)==0:
+            print(str(self.__str__()))
+            raise NotImplementedError("LOLOLOL")
+            #return None
+        else:
+            return np.random.choice(children)
 
     def is_terminal(self):
         board = np.array(self.top_board).reshape(3,3)
@@ -139,6 +143,9 @@ class UTTNode:
 
     def __eq__(node1, node2):
         return str(node1) == str(node2)
+    
+    def __hash__(self):
+        return hash(str(self))
     
     """def __str__(self):
         return ''.join([str(board_val) for board_val in self.bot_boards.values()])"""
