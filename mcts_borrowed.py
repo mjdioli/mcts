@@ -12,12 +12,13 @@ import math
 class MCTS:
     "Monte Carlo tree searcher. First rollout the tree then choose a move."
 
-    def __init__(self, computational_budget, player, exploration_weight=1):
+    def __init__(self, computational_budget, player, selection = "uct", exploration_weight=1):
         self.Q = defaultdict(int)  # total reward of each node
         self.N = defaultdict(int)  # total visit count for each node
         self.children = dict()  # children of each node
         self.exploration_weight = exploration_weight
         self.budget = computational_budget
+        self.select = selection
 
         if player not in (-1, 1):
             raise ValueError(f"Player must be 1 (X) or -1 (O), player was {player}")
@@ -66,7 +67,10 @@ class MCTS:
                 n = unexplored.pop()
                 path.append(n)
                 return path
-            node = self._uct_select(node)  # descend a layer deeper
+            if self.select == "uct":
+                node = self._uct_select(node)  # descend a layer deeper
+            else:
+                node = self._standard_select(node)
 
     def _expand(self, node):
         "Update the `children` dict with the children of `node`"
@@ -109,6 +113,15 @@ class MCTS:
             )
 
         return max(self.children[node], key=uct)
+
+    def _standard_select(self, node):
+        # All children of node should already be expanded:
+        assert all(n in self.children for n in self.children[node])
+
+        def value(n):
+            return self.Q[n] / self.N[n]
+        
+        return max(self.children[node], key=value)
 
 
 
