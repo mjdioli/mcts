@@ -6,7 +6,7 @@ import copy
 
 BOARD_SIZE = 9 # Must be a square of a natural number
 WIN_X = np.array([1,1,1])
-WIN_O = np.array([-1,-1,-1])
+WIN_O = np.array([0,0,0])
 class UTTNode:
     """
     A representation of a single board state.
@@ -17,8 +17,8 @@ class UTTNode:
     player 1 is X
     """
     def __init__(self, previous_move=None, current_player = 1):
-        self.top_board = np.zeros(BOARD_SIZE, dtype=int)
-        self.bot_boards = {i: np.zeros(BOARD_SIZE, dtype = int) for i in range(BOARD_SIZE)}
+        self.top_board = np.array([2]*BOARD_SIZE)
+        self.bot_boards = {i: np.array([2]*BOARD_SIZE) for i in range(BOARD_SIZE)}
         self.prev_move = previous_move
         self.current_player = current_player
     
@@ -39,7 +39,7 @@ class UTTNode:
             self.prev_move = move[1]
 
 
-        self.current_player *= -1
+        self.current_player = 1 if self.current_player == 0 else 0
         
         return self.copy()
 
@@ -50,14 +50,14 @@ class UTTNode:
         """
         moves = []
         if self.prev_move is None:
-            top = [index for index, value in enumerate(self.top_board) if value == 0]
-        elif self.top_board[self.prev_move] == 0:
+            top = [index for index, value in enumerate(self.top_board) if value == 2]
+        elif self.top_board[self.prev_move] == 2:
             top = [self.prev_move]
         else:
-            top = [index for index, value in enumerate(self.top_board) if value == 0]
+            top = [index for index, value in enumerate(self.top_board) if value == 2]
         #print(top)
         for board_num in top:
-            moves+=[(board_num, index) for index, position in enumerate(self.bot_boards[board_num]) if position == 0]
+            moves+=[(board_num, index) for index, position in enumerate(self.bot_boards[board_num]) if position == 2]
         return moves
     
     def copy(self):
@@ -80,7 +80,7 @@ class UTTNode:
             or np.all(board == WIN_O,axis=1).any()
             or np.all(board.diagonal() == WIN_O) # 3 in a row on the diagonal
             or np.all(np.flipud(board).diagonal() == WIN_O)
-            or not 0 in board)
+            or not 2 in board)
 
 
     def subwin(self, boardnum):
@@ -106,14 +106,16 @@ class UTTNode:
 
     def find_random_child(self):
         "Random successor of this board state (for more efficient simulation)"
-        children = list(self.find_children())
+        #children = list(self.find_children())
+        children = self.legal_moves()
         #print("Children: ", children)
         if len(children)==0:
             print(str(self.__str__()))
             raise NotImplementedError("LOLOLOL")
             #return None
         else:
-            return np.random.choice(children)
+            return self.copy().play(np.random.default_rng().choice(children,
+                1, replace=False, axis = 0)[0])
 
     def is_terminal(self):
         board = np.array(self.top_board).reshape(3,3)
@@ -125,7 +127,7 @@ class UTTNode:
             or np.all(board == WIN_O,axis=1).any()
             or np.all(board.diagonal() == WIN_O) # 3 in a row on the diagonal
             or np.all(np.flipud(board).diagonal() == WIN_O)
-            or not 0 in board)
+            or not 2 in board)
 
     def reward(self):
         board = np.array(self.top_board).reshape(3,3)
@@ -139,19 +141,19 @@ class UTTNode:
             or np.all(np.flipud(board).diagonal() == WIN_O)):
             return self.current_player
         else:
-            return 0
+            return 0.5
 
     def __eq__(node1, node2):
-        return str(node1) == str(node2)
+        return "".join([str(item) for sublist in node1.bot_boards.values() for item in sublist]) == "".join([str(item) for sublist in node2.bot_boards.values() for item in sublist])
     
     def __hash__(self):
-        return hash(str(self))
+        return hash("".join([str(item) for sublist in self.bot_boards.values() for item in sublist]))
     
     """def __str__(self):
         return ''.join([str(board_val) for board_val in self.bot_boards.values()])"""
 
     def __str__(self):
-        marks = ["_", "x", "o"]
+        marks = ["o", "x", "_"]
         result = ""
         for board in range(0,9,3):
             for row in range(0,9,3):

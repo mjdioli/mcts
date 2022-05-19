@@ -20,8 +20,8 @@ class MCTS:
         self.budget = computational_budget
         self.select = selection
 
-        if player not in (-1, 1):
-            raise ValueError(f"Player must be 1 (X) or -1 (O), player was {player}")
+        if player not in (0, 1):
+            raise ValueError(f"Player must be 1 (X) or 0 (O), player was {player}")
         else:
             self.player = player #x starts
 
@@ -31,6 +31,7 @@ class MCTS:
             raise RuntimeError(f"choose called on terminal node {node}")
 
         if node not in self.children:
+            #print("RANDOM")
             return node.find_random_child()
 
         def score(n):
@@ -85,7 +86,7 @@ class MCTS:
             if node.is_terminal():
                 #print("inside_simulate")
                 reward = node.reward()
-                return reward if self.player == 1 else reward*(-1)
+                return reward if self.player == 1 else 0
             node = node.find_random_child()
             """            counter += 1
             if counter >50:
@@ -96,7 +97,13 @@ class MCTS:
         for node in reversed(path):
             self.N[node] += 1
             self.Q[node] += reward
-            reward = reward*(-1)  # 1 for me is 0 for my enemy, and vice versa
+            #reward = reward*(-1)  # 1 for me is 0 for my enemy, and vice versa
+            if reward == 1:
+                reward = 0
+            elif reward == 0.5:
+                reward = 0.5
+            else:
+                reward = 0
 
     def _uct_select(self, node):
         "Select a child of node, balancing exploration & exploitation"
